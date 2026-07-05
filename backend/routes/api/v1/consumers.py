@@ -6,7 +6,7 @@ from sqlalchemy import desc
 from core.database import get_bnpl_db, get_cbs_staging_db
 from services.consumer_service import ConsumerService
 from schemas.consumer import ConsumerLimitResponse
-from routes.dependencies import get_current_admin
+from routes.dependencies import get_current_admin, get_current_consumer
 from models.consumer import Consumer
 
 router = APIRouter(prefix="/consumers", tags=["Consumers"])
@@ -79,6 +79,36 @@ def list_consumers(
         "data": data,
         "pagination": {"page": page, "page_size": page_size, "total": total, "total_pages": (total + page_size - 1) // page_size},
     }
+
+
+@router.get("/me", summary="Get current consumer profile (consumer-facing)")
+def get_my_profile(
+    consumer: Consumer = Depends(get_current_consumer),
+):
+    return {
+        "consumer_id": consumer.consumer_id,
+        "name": consumer.name,
+        "phone": consumer.phone,
+        "email": consumer.email,
+        "bnpl_limit_lak": float(consumer.bnpl_limit_lak or 0),
+        "available_limit_lak": float(consumer.available_limit_lak or 0),
+        "risk_tier": consumer.risk_tier,
+        "limit_expiry": consumer.limit_expiry.isoformat() if consumer.limit_expiry else None,
+        "is_active": consumer.is_active,
+    }
+
+
+@router.get("/me/limit", response_model=ConsumerLimitResponse, summary="Get own BNPL limit (consumer-facing)")
+def get_my_limit(
+    consumer: Consumer = Depends(get_current_consumer),
+):
+    return ConsumerLimitResponse(
+        consumer_id=consumer.consumer_id,
+        bnpl_limit_lak=consumer.bnpl_limit_lak,
+        available_limit_lak=consumer.available_limit_lak,
+        limit_expiry=consumer.limit_expiry,
+        risk_tier=consumer.risk_tier,
+    )
 
 
 @router.get("/{consumer_id}/limit", summary="Get consumer BNPL limit")

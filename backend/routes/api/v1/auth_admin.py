@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from core.security import create_access_token, verify_password
 from models.merchant import MerchantUser
+from models.consumer import Consumer
+from common.exceptions import UnauthorizedError
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -20,6 +22,31 @@ class LoginResponse(BaseModel):
     user_id: str
     name: str
     role: str
+
+
+class ConsumerLoginRequest(BaseModel):
+    consumer_id: str = Field(..., max_length=32)
+    phone: str = Field(..., max_length=20)
+
+
+@router.post("/consumer-login", summary="Consumer-facing login for limit self-service")
+def consumer_login(
+    req: ConsumerLoginRequest,
+    db: Session = Depends(get_bnpl_db),
+):
+    consumer = db.query(Consumer).filter(
+        Consumer.consumer_id == req.consumer_id,
+        Consumer.phone == req.phone,
+    ).first()
+    if not consumer:
+        raise UnauthorizedError("Invalid consumer credentials")
+    token_data = {
+        "sub": consumer.consumer_id,
+        "role": "consumer",
+        "name": consumer.name,
+    }
+    access_token = create_access_token(token_data)
+    return {"access_token": access_token, "token_type": "bearer", "consumer_id": consumer.consumer_id}
 
 
 @router.post("/login", response_model=LoginResponse, summary="Admin/Merchant user login")

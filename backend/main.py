@@ -30,6 +30,7 @@ from routes.api.v1 import (
     complaints_router,
 )
 from services.metrics_service import MetricsMiddleware
+from tasks.scheduler import start_scheduler
 from common.exceptions import (
     NotFoundError,
     ConflictError,
@@ -45,7 +46,9 @@ async def lifespan(app: FastAPI):
     setup_logging()
     await init_redis()
     await init_kafka()
+    scheduler = start_scheduler()
     yield
+    scheduler.shutdown(wait=False)
     await close_kafka()
     await close_redis()
 

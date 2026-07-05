@@ -34,6 +34,26 @@ def get_current_merchant_user(
     return payload
 
 
+def get_current_consumer(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    db: Session = Depends(get_bnpl_db),
+):
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    if not payload:
+        raise UnauthorizedError("Invalid or expired token")
+    role = payload.get("role", "")
+    if role != "consumer":
+        raise ForbiddenError("Consumer access required")
+    from models.consumer import Consumer
+    consumer = db.query(Consumer).filter(
+        Consumer.consumer_id == payload.get("sub")
+    ).first()
+    if not consumer:
+        raise UnauthorizedError("Consumer not found")
+    return consumer
+
+
 def get_api_merchant(
     x_api_key: str = Header(..., alias="X-API-Key"),
     db: Session = Depends(get_bnpl_db),

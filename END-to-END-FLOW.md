@@ -1312,6 +1312,52 @@ docker-compose exec kafka kafka-topics --list --bootstrap-server localhost:9092
 docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic bnpl-auth --from-beginning
 ```
 
+### 5.6 Syntax Checking
+
+Quick syntax validation after making code changes — no database or server required.
+
+#### Backend (Python)
+
+```bash
+# Single file — check one route file at a time
+python -m py_compile backend/routes/api/v1/merchants.py && echo "OK"
+
+# Batch check — validate all route files at once (bash)
+for f in auth.py auth_admin.py merchants.py consumers.py transactions.py staging.py webhooks.py refunds.py disputes.py settlements.py eod.py reconciliation.py fees.py fraud_rules.py repayments.py credit.py notifications.py complaints.py; do python -m py_compile "backend/routes/api/v1/$f" && echo "$f OK"; done
+
+# Batch check — validate all route files at once (PowerShell)
+Get-ChildItem backend/routes/api/v1/*.py | ForEach-Object { python -m py_compile $_.FullName; if ($LASTEXITCODE -eq 0) { Write-Host "$($_.Name) OK" } }
+
+# Core files — validate supporting modules
+python -m py_compile backend/common/utils.py && echo "utils.py OK"
+python -m py_compile backend/common/exceptions.py && echo "exceptions.py OK"
+python -m py_compile backend/main.py && echo "main.py OK"
+
+# Full backend syntax check (bash)
+python -m py_compile backend/common/utils.py && echo "utils.py OK" && python -m py_compile backend/common/exceptions.py && echo "exceptions.py OK" && python -m py_compile backend/main.py && echo "main.py OK" && for f in backend/routes/api/v1/*.py; do python -m py_compile "$f" && echo "$(basename $f) OK"; done
+```
+
+#### Frontend (TypeScript)
+
+```bash
+# TypeScript type check — validates all .ts/.tsx files (recommended)
+cd frontend && npx tsc --noEmit
+
+# Lint check — enforces code style rules
+cd frontend && npx eslint src/
+
+# Combined check — run both in sequence
+cd frontend && npx tsc --noEmit && npx eslint src/
+
+# Check a single file
+cd frontend && npx tsc --noEmit src/pages/MerchantsPage.tsx
+
+# Build check — verifies the entire production bundle compiles
+cd frontend && npm run build
+```
+
+**Tip:** Run the backend batch syntax check and `npx tsc --noEmit` before every commit to catch import errors, type mismatches, and syntax issues early.
+
 ---
 
 ## 6. Development Environment Setup

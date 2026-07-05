@@ -6,11 +6,13 @@ from core.database import get_cbs_staging_db
 from schemas.reconciliation import ReconcileBatchRequest, ReconcileBatchResponse, DailyReconcileReportResponse
 from routes.dependencies import get_current_admin
 from services.reconciliation_service import ReconciliationService
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/reconciliation", tags=["Reconciliation"])
 
 
 @router.post("/batch", response_model=ReconcileBatchResponse, summary="Reconcile a staging batch")
+@safe_endpoint
 def reconcile_batch(
     req: ReconcileBatchRequest,
     admin: dict = Depends(get_current_admin),
@@ -22,6 +24,7 @@ def reconcile_batch(
 
 
 @router.get("/daily-report", response_model=DailyReconcileReportResponse, summary="Generate daily reconciliation report")
+@safe_endpoint
 def daily_report(
     report_date: str | None = None,
     admin: dict = Depends(get_current_admin),

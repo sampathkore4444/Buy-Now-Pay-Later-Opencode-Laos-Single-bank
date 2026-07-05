@@ -8,11 +8,13 @@ from schemas.eod import EODBatchStatusResponse, EODRunResponse, EODListResponse
 from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 from tasks.eod_batch import EODBatchProcessor
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/eod", tags=["EOD Batch"])
 
 
 @router.get("/batches", response_model=EODListResponse, summary="List EOD batch runs")
+@safe_endpoint
 def list_eod_batches(
     page: int = 1,
     page_size: int = 20,
@@ -43,6 +45,7 @@ def list_eod_batches(
 
 
 @router.get("/batches/{batch_id}", response_model=EODBatchStatusResponse, summary="Get EOD batch details")
+@safe_endpoint
 def get_eod_batch(
     batch_id: str,
     admin: dict = Depends(get_current_admin),
@@ -66,6 +69,7 @@ def get_eod_batch(
 
 
 @router.post("/run", response_model=dict, summary="Trigger EOD batch processing")
+@safe_endpoint
 def trigger_eod(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -76,6 +80,7 @@ def trigger_eod(
 
 
 @router.get("/status", response_model=dict, summary="Get EOD system status")
+@safe_endpoint
 def eod_system_status(
     admin: dict = Depends(get_current_admin),
     cbs_db: Session = Depends(get_cbs_staging_db),

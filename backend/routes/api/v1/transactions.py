@@ -5,7 +5,7 @@ from core.database import get_bnpl_db
 from services.transaction_service import TransactionService
 from schemas.transaction import TransactionResponse
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -32,6 +32,7 @@ def _to_response(txn) -> TransactionResponse:
 
 
 @router.get("/{txn_id}", response_model=TransactionResponse, summary="Get transaction details")
+@safe_endpoint
 def get_transaction(
     txn_id: str,
     admin: dict = Depends(get_current_admin),
@@ -43,6 +44,7 @@ def get_transaction(
 
 
 @router.get("", response_model=PaginatedResponse, summary="List transactions")
+@safe_endpoint
 def list_transactions(
     admin: dict = Depends(get_current_admin),
     merchant_id: str | None = Query(None),

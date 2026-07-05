@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db, get_cbs_staging_db
 from models.overdue import OverdueTracker
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from services.fee_service import FeeService
 from routes.dependencies import get_current_admin
 
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/fees", tags=["Fees & Overdue"])
 
 
 @router.get("/overdue", response_model=PaginatedResponse, summary="List overdue trackers (paginated)")
+@safe_endpoint
 def list_overdue(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -44,6 +45,7 @@ def list_overdue(
 
 
 @router.get("/overdue/{consumer_id}", response_model=dict, summary="Get consumer overdue details")
+@safe_endpoint
 def get_consumer_overdue(
     consumer_id: str,
     admin: dict = Depends(get_current_admin),
@@ -58,6 +60,7 @@ def get_consumer_overdue(
 
 
 @router.post("/assess-late-fees", response_model=dict, summary="Trigger late fee assessment batch")
+@safe_endpoint
 def assess_late_fees(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -70,6 +73,7 @@ def assess_late_fees(
 
 
 @router.post("/assess-interest", response_model=dict, summary="Trigger interest assessment batch")
+@safe_endpoint
 def assess_interest(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),

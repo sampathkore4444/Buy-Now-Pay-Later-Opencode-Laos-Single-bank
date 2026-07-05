@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from models.settlement import FraudRule
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from common.exceptions import ConflictError, NotFoundError
 from routes.dependencies import get_current_admin
 
@@ -31,6 +31,7 @@ class FraudRuleUpdate(BaseModel):
 
 
 @router.get("", response_model=PaginatedResponse, summary="List all fraud rules")
+@safe_endpoint
 def list_rules(
     admin: dict = Depends(get_current_admin),
     page: int = Query(1, ge=1),
@@ -56,6 +57,7 @@ def list_rules(
 
 
 @router.post("", response_model=dict, status_code=201, summary="Create a fraud rule")
+@safe_endpoint
 def create_rule(
     req: FraudRuleCreate,
     admin: dict = Depends(get_current_admin),
@@ -79,6 +81,7 @@ def create_rule(
 
 
 @router.put("/{rule_id}", response_model=dict, summary="Update a fraud rule")
+@safe_endpoint
 def update_rule(
     rule_id: int,
     req: FraudRuleUpdate,
@@ -96,6 +99,7 @@ def update_rule(
 
 
 @router.delete("/{rule_id}", status_code=204, summary="Delete a fraud rule")
+@safe_endpoint
 def delete_rule(
     rule_id: int,
     admin: dict = Depends(get_current_admin),

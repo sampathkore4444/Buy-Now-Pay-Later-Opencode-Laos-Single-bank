@@ -13,6 +13,7 @@ from models.transaction import Transaction
 from common.enums import TxnType, TxnCategory
 from common.utils import generate_uuid
 from common.exceptions import NotFoundError, BadRequestError
+from common.utils import safe_endpoint
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/repayments", tags=["Repayments"])
@@ -24,6 +25,7 @@ class ManualRepaymentRequest(BaseModel):
 
 
 @router.post("/trigger-auto-debit", response_model=dict, summary="Trigger auto-debit repayment batch")
+@safe_endpoint
 def trigger_auto_debit(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -36,6 +38,7 @@ def trigger_auto_debit(
 
 
 @router.post("/manual", response_model=dict, status_code=201, summary="Record a manual consumer repayment")
+@safe_endpoint
 def manual_repayment(
     req: ManualRepaymentRequest,
     admin: dict = Depends(get_current_admin),

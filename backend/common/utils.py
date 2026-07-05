@@ -1,6 +1,13 @@
+import functools
+import inspect
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any
+
+from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 
 def generate_uuid() -> str:
@@ -54,3 +61,33 @@ def build_pagination_response(
         "data": items,
         "pagination": pagination.model_dump(),
     }
+
+
+def safe_endpoint(func):
+    """Decorator that wraps route handlers with try-catch + logging.
+
+    Catches unhandled exceptions, logs them with the function name,
+    then re-raises so FastAPI's global exception handler can format the response.
+    """
+    if inspect.iscoroutinefunction(func):
+        @functools.wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            try:
+                return await func(*args, **kwargs)
+            except HTTPException:
+                raise
+            except Exception:
+                logger.exception("Unhandled error in %s", func.__qualname__)
+                raise
+        return async_wrapper
+    else:
+        @functools.wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except HTTPException:
+                raise
+            except Exception:
+                logger.exception("Unhandled error in %s", func.__qualname__)
+                raise
+        return sync_wrapper

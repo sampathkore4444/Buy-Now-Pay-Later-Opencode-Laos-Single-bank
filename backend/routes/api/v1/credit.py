@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from models.settlement import CreditLimitRefreshLog
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response, generate_uuid
+from common.utils import build_pagination_response, generate_uuid, safe_endpoint
 from services.credit_service import CreditService
 from routes.dependencies import get_current_admin
 
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/credit", tags=["Credit Management"])
 
 
 @router.post("/refresh", response_model=dict, summary="Trigger credit limit refresh from Redis")
+@safe_endpoint
 async def refresh_limits(
     admin: dict = Depends(get_current_admin),
     db: Session = Depends(get_bnpl_db),
@@ -43,6 +44,7 @@ async def refresh_limits(
 
 
 @router.get("/refresh-logs", response_model=PaginatedResponse, summary="List credit limit refresh logs")
+@safe_endpoint
 def list_refresh_logs(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),

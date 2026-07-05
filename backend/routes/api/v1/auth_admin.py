@@ -7,6 +7,7 @@ from core.security import create_access_token, verify_password
 from models.merchant import MerchantUser
 from models.consumer import Consumer
 from common.exceptions import UnauthorizedError
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -30,6 +31,7 @@ class ConsumerLoginRequest(BaseModel):
 
 
 @router.post("/consumer-login", response_model=dict, summary="Consumer-facing login for limit self-service")
+@safe_endpoint
 def consumer_login(
     req: ConsumerLoginRequest,
     db: Session = Depends(get_bnpl_db),
@@ -50,6 +52,7 @@ def consumer_login(
 
 
 @router.post("/login", response_model=LoginResponse, summary="Admin/Merchant user login")
+@safe_endpoint
 def login(
     req: LoginRequest,
     db: Session = Depends(get_bnpl_db),

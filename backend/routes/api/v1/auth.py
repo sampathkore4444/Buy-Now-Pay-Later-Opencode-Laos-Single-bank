@@ -13,6 +13,7 @@ from services.auth_service import AuthService
 from services.merchant_service import MerchantService
 from services.consumer_service import ConsumerService
 from common.exceptions import InsufficientLimitError
+from common.utils import safe_endpoint
 from routes.dependencies import get_api_merchant
 
 router = APIRouter(prefix="/bnpl", tags=["Authorization"])
@@ -24,6 +25,7 @@ router = APIRouter(prefix="/bnpl", tags=["Authorization"])
     summary="Real-time BNPL authorization",
     description="Authorize a BNPL transaction. Checks consumer limit, merchant status, and fraud rules.",
 )
+@safe_endpoint
 async def authorize(
     req: AuthRequestSchema,
     merchant: Merchant = Depends(get_api_merchant),
@@ -39,6 +41,7 @@ async def authorize(
 
 
 @router.post("/auth/confirm", response_model=dict, summary="Confirm an authorized transaction")
+@safe_endpoint
 async def confirm_auth(
     req: AuthConfirmRequest,
     merchant: Merchant = Depends(get_api_merchant),
@@ -50,6 +53,7 @@ async def confirm_auth(
 
 
 @router.post("/auth/cancel", response_model=dict, summary="Cancel an authorized transaction")
+@safe_endpoint
 async def cancel_auth(
     req: AuthConfirmRequest,
     merchant: Merchant = Depends(get_api_merchant),
@@ -61,6 +65,7 @@ async def cancel_auth(
 
 
 @router.get("/auth/{auth_id}", response_model=dict, summary="Get authorization status")
+@safe_endpoint
 async def get_auth_status(
     auth_id: str,
     db: Session = Depends(get_bnpl_db),

@@ -7,7 +7,7 @@ from core.database import get_bnpl_db
 from services.consumer_service import ConsumerService
 from schemas.consumer import ConsumerLimitResponse
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from routes.dependencies import get_current_admin, get_current_consumer
 from models.consumer import Consumer
 
@@ -29,6 +29,7 @@ class ConsumerEnrollResponse(BaseModel):
 
 @router.post("/enroll", response_model=ConsumerEnrollResponse, status_code=201,
              summary="Enroll a consumer for BNPL (one-time signup)")
+@safe_endpoint
 def enroll_consumer(
     req: ConsumerEnrollRequest,
     admin: dict = Depends(get_current_admin),
@@ -49,6 +50,7 @@ def enroll_consumer(
 
 
 @router.get("", response_model=PaginatedResponse, summary="List consumers (paginated)")
+@safe_endpoint
 def list_consumers(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -81,6 +83,7 @@ def list_consumers(
 
 
 @router.get("/me", response_model=dict, summary="Get current consumer profile (consumer-facing)")
+@safe_endpoint
 def get_my_profile(
     consumer: Consumer = Depends(get_current_consumer),
 ):
@@ -98,6 +101,7 @@ def get_my_profile(
 
 
 @router.get("/me/limit", response_model=ConsumerLimitResponse, summary="Get own BNPL limit (consumer-facing)")
+@safe_endpoint
 def get_my_limit(
     consumer: Consumer = Depends(get_current_consumer),
 ):
@@ -111,6 +115,7 @@ def get_my_limit(
 
 
 @router.get("/{consumer_id}/limit", response_model=ConsumerLimitResponse, summary="Get consumer BNPL limit")
+@safe_endpoint
 def get_consumer_limit(
     consumer_id: str,
     admin: dict = Depends(get_current_admin),

@@ -9,7 +9,7 @@ from schemas.merchant import (
 )
 from schemas.common import PaginatedResponse
 from services.merchant_service import MerchantService
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from routes.dependencies import get_current_admin
 from models.merchant import MerchantDocument
 
@@ -18,6 +18,7 @@ router = APIRouter(prefix="/merchants", tags=["Merchants"])
 
 @router.post("/onboard", response_model=MerchantOnboardResponse, status_code=201,
              summary="Onboard a new merchant")
+@safe_endpoint
 def onboard_merchant(
     req: MerchantOnboardRequest,
     admin: dict = Depends(get_current_admin),
@@ -28,6 +29,7 @@ def onboard_merchant(
 
 
 @router.get("/{merchant_id}", response_model=MerchantDetailResponse, summary="Get merchant details")
+@safe_endpoint
 def get_merchant(
     merchant_id: str,
     admin: dict = Depends(get_current_admin),
@@ -50,6 +52,7 @@ def get_merchant(
 
 
 @router.get("", response_model=PaginatedResponse, summary="List merchants")
+@safe_endpoint
 def list_merchants(
     admin: dict = Depends(get_current_admin),
     page: int = Query(1, ge=1),
@@ -78,6 +81,7 @@ def list_merchants(
 
 
 @router.post("/{merchant_id}/documents", response_model=dict, status_code=201, summary="Upload a merchant document")
+@safe_endpoint
 def upload_document(
     merchant_id: str,
     file: UploadFile = File(...),
@@ -100,6 +104,7 @@ def upload_document(
 
 
 @router.get("/{merchant_id}/documents", response_model=dict, summary="List merchant documents")
+@safe_endpoint
 def list_documents(
     merchant_id: str,
     admin: dict = Depends(get_current_admin),
@@ -120,6 +125,7 @@ def list_documents(
 
 
 @router.patch("/{merchant_id}", response_model=MerchantDetailResponse, summary="Update merchant details")
+@safe_endpoint
 def update_merchant(
     merchant_id: str,
     req: MerchantUpdateRequest,

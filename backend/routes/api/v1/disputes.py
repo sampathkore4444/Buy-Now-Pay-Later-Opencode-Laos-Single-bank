@@ -9,11 +9,13 @@ from schemas.dispute import (
 )
 from services.dispute_service import DisputeService
 from routes.dependencies import get_current_admin
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/disputes", tags=["Disputes"])
 
 
 @router.post("/initiate", response_model=DisputeInitiateResponse, status_code=201, summary="Register a dispute")
+@safe_endpoint
 def initiate_dispute(
     req: DisputeInitiateRequest,
     db: Session = Depends(get_bnpl_db),
@@ -24,6 +26,7 @@ def initiate_dispute(
 
 @router.get("/cooling-off/{consumer_id}/{auth_id}", response_model=CoolingOffCheckResponse,
             summary="Check cooling-off eligibility")
+@safe_endpoint
 def check_cooling_off(
     consumer_id: str, auth_id: str,
     db: Session = Depends(get_bnpl_db),
@@ -34,6 +37,7 @@ def check_cooling_off(
 
 @router.post("/cooling-off/cancel", response_model=CoolingOffCancelResponse, status_code=201,
              summary="Cancel transaction under cooling-off period")
+@safe_endpoint
 def cancel_cooling_off(
     consumer_id: str, auth_id: str,
     db: Session = Depends(get_bnpl_db),
@@ -43,6 +47,7 @@ def cancel_cooling_off(
 
 
 @router.post("/{dispute_id}/resolve", response_model=DisputeResponse, summary="Resolve a dispute (admin)")
+@safe_endpoint
 def resolve_dispute(
     dispute_id: str,
     req: DisputeResolveRequest,
@@ -55,6 +60,7 @@ def resolve_dispute(
 
 @router.get("/consumer/{consumer_id}", response_model=list[DisputeResponse],
             summary="List disputes for a consumer")
+@safe_endpoint
 def list_consumer_disputes(
     consumer_id: str,
     db: Session = Depends(get_bnpl_db),

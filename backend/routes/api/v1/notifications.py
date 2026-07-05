@@ -5,13 +5,14 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from models.settlement import NotificationLog
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
 @router.get("", response_model=PaginatedResponse, summary="List notification logs (paginated)")
+@safe_endpoint
 def list_notifications(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),

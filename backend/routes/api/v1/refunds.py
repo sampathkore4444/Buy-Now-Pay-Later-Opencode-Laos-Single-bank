@@ -7,6 +7,7 @@ from core.database import get_bnpl_db, get_cbs_staging_db
 from models.merchant import Merchant
 from services.refund_service import RefundService
 from routes.dependencies import get_api_merchant
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/refunds", tags=["Refunds"])
 
@@ -24,6 +25,7 @@ class RefundResponse(BaseModel):
 
 @router.post("", response_model=RefundResponse, status_code=201,
              summary="Initiate a refund for a settled BNPL transaction")
+@safe_endpoint
 def initiate_refund(
     req: RefundRequest,
     merchant: Merchant = Depends(get_api_merchant),

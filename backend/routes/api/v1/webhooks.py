@@ -4,7 +4,7 @@ from sqlalchemy import desc
 
 from core.database import get_bnpl_db
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response
+from common.utils import build_pagination_response, safe_endpoint
 from common.exceptions import ForbiddenError
 from services.merchant_service import MerchantService
 from services.transaction_service import TransactionService
@@ -18,6 +18,7 @@ router = APIRouter(prefix="/webhooks", tags=["Webhooks"])
 
 @router.post("/merchants/{merchant_id}", response_model=dict, status_code=201,
              summary="Receive merchant webhook callbacks")
+@safe_endpoint
 async def merchant_webhook(
     merchant_id: str,
     request: Request,
@@ -35,6 +36,7 @@ async def merchant_webhook(
 
 
 @router.get("/logs", response_model=PaginatedResponse, summary="List webhook logs (paginated)")
+@safe_endpoint
 def list_webhook_logs(
     merchant_id: str | None = None,
     page: int = Query(1, ge=1),

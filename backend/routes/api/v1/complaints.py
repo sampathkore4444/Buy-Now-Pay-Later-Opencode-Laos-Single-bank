@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from models.complaint import Complaint
 from schemas.common import PaginatedResponse
-from common.utils import build_pagination_response, generate_uuid
+from common.utils import build_pagination_response, generate_uuid, safe_endpoint
 from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 
@@ -27,6 +27,7 @@ class ComplaintResolveRequest(BaseModel):
 
 
 @router.post("", response_model=dict, status_code=201, summary="Submit a consumer complaint")
+@safe_endpoint
 def create_complaint(
     req: ComplaintCreateRequest,
     admin: dict = Depends(get_current_admin),
@@ -51,6 +52,7 @@ def create_complaint(
 
 
 @router.get("", response_model=PaginatedResponse, summary="List complaints (paginated)")
+@safe_endpoint
 def list_complaints(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -84,6 +86,7 @@ def list_complaints(
 
 
 @router.post("/{complaint_id}/resolve", response_model=dict, summary="Resolve a complaint")
+@safe_endpoint
 def resolve_complaint(
     complaint_id: str,
     req: ComplaintResolveRequest,

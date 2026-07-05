@@ -9,11 +9,13 @@ from schemas.settlement import SettlementResponse, SettlementListResponse
 from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 from services.settlement_service import SettlementService
+from common.utils import safe_endpoint
 
 router = APIRouter(prefix="/settlements", tags=["Settlements"])
 
 
 @router.get("", response_model=SettlementListResponse, summary="List settlements (paginated)")
+@safe_endpoint
 def list_settlements(
     merchant_id: str | None = None,
     page: int = 1,
@@ -33,6 +35,7 @@ def list_settlements(
 
 
 @router.get("/{settlement_id}", response_model=SettlementResponse, summary="Get settlement details")
+@safe_endpoint
 def get_settlement(
     settlement_id: str,
     admin: dict = Depends(get_current_admin),
@@ -46,6 +49,7 @@ def get_settlement(
 
 @router.post("/{merchant_id}/create-daily", response_model=SettlementResponse, status_code=201,
              summary="Create daily settlement for a merchant")
+@safe_endpoint
 def create_daily_settlement(
     merchant_id: str,
     settlement_date: str | None = None,

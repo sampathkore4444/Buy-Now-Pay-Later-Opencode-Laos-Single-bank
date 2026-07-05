@@ -1,0 +1,101 @@
+from enum import Enum
+
+
+class AuthStatus(str, Enum):
+    INITIATED = "INITIATED"
+    PENDING = "PENDING"
+    AUTHED = "AUTHED"
+    CONFIRMED = "CONFIRMED"
+    CANCELLED = "CANCELLED"
+    FAILED = "FAILED"
+    SETTLED = "SETTLED"
+    REFUNDED = "REFUNDED"
+
+
+class StagingStatus(str, Enum):
+    PENDING = "PENDING"
+    PICKED = "PICKED"
+    POSTED = "POSTED"
+    FAILED = "FAILED"
+    REVERTED = "REVERTED"
+    HELD = "HELD"
+
+
+class ControlStatus(str, Enum):
+    OPEN = "OPEN"
+    READY_FOR_PICKUP = "READY_FOR_PICKUP"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    PARTIAL = "PARTIAL"
+    FAILED = "FAILED"
+
+
+class TxnType(str, Enum):
+    DEBIT = "DEBIT"
+    CREDIT = "CREDIT"
+    TRANSFER = "TRANSFER"
+    REVERSAL = "REVERSAL"
+
+
+class TxnCategory(str, Enum):
+    BNPL_PURCHASE = "BNPL_PURCHASE"
+    BNPL_REPAYMENT = "BNPL_REPAYMENT"
+    BNPL_REFUND = "BNPL_REFUND"
+    BNPL_LATE_FEE = "BNPL_LATE_FEE"
+    BNPL_INTEREST = "BNPL_INTEREST"
+    BNPL_SETTLEMENT = "BNPL_SETTLEMENT"
+    BNPL_MDR_ACCRUAL = "BNPL_MDR_ACCRUAL"
+
+
+class DetailType(str, Enum):
+    PRINCIPAL = "PRINCIPAL"
+    MDR = "MDR"
+    LATE_FEE = "LATE_FEE"
+    INTEREST = "INTEREST"
+    TAX = "TAX"
+    COMMISSION = "COMMISSION"
+
+
+class MerchantStatus(str, Enum):
+    PENDING_KYC = "PENDING_KYC"
+    APPROVED = "APPROVED"
+    SUSPENDED = "SUSPENDED"
+    REJECTED = "REJECTED"
+    CLOSED = "CLOSED"
+
+
+class RiskTier(str, Enum):
+    GREEN = "GREEN"
+    YELLOW = "YELLOW"
+    ORANGE = "ORANGE"
+    RED = "RED"
+
+
+class ChannelType(str, Enum):
+    LAOQR = "LAOQR"
+    ECOMMERCE_API = "ECOMMERCE_API"
+    DYNAMIC_QR = "DYNAMIC_QR"
+    PAY_BY_LINK = "PAY_BY_LINK"
+    OTC_BRANCH = "OTC_BRANCH"
+
+
+class ErrorSeverity(str, Enum):
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    FATAL = "FATAL"
+
+
+class ReconcileStatus(str, Enum):
+    MATCHED = "MATCHED"
+    MISMATCH = "MISMATCH"
+    PENDING = "PENDING"
+    BALANCED = "BALANCED"
+    UNBALANCED = "UNBALANCED"
+
+
+class BusinessType(str, Enum):
+    SOLE_PROPRIETORSHIP = "SOLE_PROPRIETORSHIP"
+    PARTNERSHIP = "PARTNERSHIP"
+    LIMITED_COMPANY = "LIMITED_COMPANY"
+    PUBLIC_COMPANY = "PUBLIC_COMPANY"
+    COOPERATIVE = "COOPERATIVE"

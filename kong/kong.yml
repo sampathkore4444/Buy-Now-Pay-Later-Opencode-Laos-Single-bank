@@ -1,0 +1,87 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: bnpl-auth-service
+    url: http://bnpl-api:8000
+    routes:
+      - name: bnpl-auth-route
+        paths:
+          - /api/v1/bnpl
+        methods:
+          - POST
+          - GET
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+      - name: cors
+
+  - name: bnpl-merchant-service
+    url: http://bnpl-api:8000
+    routes:
+      - name: bnpl-merchant-route
+        paths:
+          - /api/v1/merchants
+        methods:
+          - GET
+          - POST
+          - PATCH
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 60
+          hour: 500
+      - name: cors
+
+  - name: bnpl-staging-service
+    url: http://bnpl-api:8000
+    routes:
+      - name: bnpl-staging-route
+        paths:
+          - /api/v1/staging
+        methods:
+          - GET
+          - POST
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 200
+          hour: 5000
+      - name: cors
+
+  - name: bnpl-consumer-service
+    url: http://bnpl-api:8000
+    routes:
+      - name: bnpl-consumer-route
+        paths:
+          - /api/v1/consumers
+        methods:
+          - GET
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+      - name: cors
+
+  - name: bnpl-transaction-service
+    url: http://bnpl-api:8000
+    routes:
+      - name: bnpl-transaction-route
+        paths:
+          - /api/v1/transactions
+        methods:
+          - GET
+        strip_path: false
+    plugins:
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 1000
+      - name: cors

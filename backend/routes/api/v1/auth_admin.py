@@ -1,0 +1,49 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from core.database import get_bnpl_db
+from core.security import create_access_token, verify_password
+from models.merchant import MerchantUser
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class LoginRequest(BaseModel):
+    email: str = Field(..., max_length=128)
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    name: str
+    role: str
+
+
+@router.post("/login", response_model=LoginResponse, summary="Admin/Merchant user login")
+def login(
+    req: LoginRequest,
+    db: Session = Depends(get_bnpl_db),
+):
+    user = db.query(MerchantUser).filter(MerchantUser.email == req.email).first()
+    if not user or not verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+
+    token_data = {
+        "sub": user.email,
+        "user_id": str(user.id),
+        "role": "admin" if user.role == "ADMIN" else "merchant",
+        "name": user.name,
+    }
+    access_token = create_access_token(token_data)
+
+    return LoginResponse(
+        access_token=access_token,
+        user_id=str(user.id),
+        name=user.name,
+        role=user.role,
+    )

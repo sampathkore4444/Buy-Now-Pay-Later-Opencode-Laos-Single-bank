@@ -1,0 +1,12 @@
+from routes.api.v1.auth import router as auth_router
+from routes.api.v1.auth_admin import router as auth_admin_router
+from routes.api.v1.merchants import router as merchants_router
+from routes.api.v1.consumers import router as consumers_router
+from routes.api.v1.staging import router as staging_router
+from routes.api.v1.transactions import router as transactions_router
+from routes.api.v1.webhooks import router as webhooks_router
+from routes.api.v1.refunds import router as refunds_router
+from routes.api.v1.disputes import router as disputes_router
+from routes.api.v1.settlements import router as settlements_router
+from routes.api.v1.eod import router as eod_router
+from routes.api.v1.reconciliation import router as reconciliation_router

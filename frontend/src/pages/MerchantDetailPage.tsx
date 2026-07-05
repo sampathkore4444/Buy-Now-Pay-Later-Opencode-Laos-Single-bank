@@ -36,7 +36,7 @@ export default function MerchantDetailPage() {
       </Typography>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>Merchant Details</Typography>
@@ -49,7 +49,7 @@ export default function MerchantDetailPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>Limits</Typography>

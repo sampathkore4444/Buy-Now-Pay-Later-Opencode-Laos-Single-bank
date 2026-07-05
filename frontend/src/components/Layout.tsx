@@ -28,6 +28,10 @@ import {
   Storage,
   Webhook,
   Logout,
+  Gavel,
+  Warning,
+  Notifications,
+  Cached,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -45,6 +49,10 @@ const navItems = [
   { label: 'Reconciliation', path: '/reconciliation', icon: <CompareArrows /> },
   { label: 'Staging', path: '/staging', icon: <Storage /> },
   { label: 'Webhooks', path: '/webhooks', icon: <Webhook /> },
+  { label: 'Fraud Rules', path: '/fraud-rules', icon: <Gavel /> },
+  { label: 'Overdue', path: '/overdue', icon: <Warning /> },
+  { label: 'Notifications', path: '/notifications', icon: <Notifications /> },
+  { label: 'Credit Refresh', path: '/credit-refresh', icon: <Cached /> },
 ];
 
 export default function Layout() {

@@ -30,7 +30,6 @@ export default function DashboardPage() {
   const { data: settlements } = useQuery({
     queryKey: ['settlements', 'dashboard'],
     queryFn: () => fetchSettlements({ page_size: 1 }),
-    enabled: false,
   });
 
   const { data: eodStatus } = useQuery({
@@ -39,7 +38,6 @@ export default function DashboardPage() {
     refetchInterval: 15000,
   });
 
-  const pendingSettlements = settlements?.pagination?.total ?? '—';
   const activeCount = merchants?.data?.filter((m: any) => m.status === 'APPROVED').length ?? '—';
 
   const stats = [
@@ -54,11 +52,11 @@ export default function DashboardPage() {
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Dashboard</Typography>
       <Grid container spacing={3}>
         {stats.map((stat) => (
-          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={stat.title}>
+          <Grid xs={12} sm={6} md={3} key={stat.title}>
             <StatCard {...stat} />
           </Grid>
         ))}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Recent Merchants</Typography>
             {merchants?.data?.length ? (
@@ -73,7 +71,7 @@ export default function DashboardPage() {
             )}
           </Paper>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>System Health</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>

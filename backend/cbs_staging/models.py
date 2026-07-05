@@ -2,6 +2,11 @@ from sqlalchemy import (
     Column, BigInteger, Integer, SmallInteger, String, DateTime, Date,
     Numeric, Text, ForeignKey, UniqueConstraint, CheckConstraint, Index, func
 )
+try:
+    from sqlalchemy.dialects.postgresql import JSONB
+    HAS_JSONB = True
+except ImportError:
+    HAS_JSONB = False
 from core.database import Base
 
 
@@ -195,5 +200,5 @@ class STG_AUDIT_TRAIL(Base):
     TIMESTAMP = Column(DateTime(3), nullable=False, server_default=func.now())
     CLIENT_IP = Column(String(45), nullable=True)
     SESSION_ID = Column(String(128), nullable=True)
-    OLD_VALUES = Column(Text, nullable=True)
-    NEW_VALUES = Column(Text, nullable=True)
+    OLD_VALUES = Column(JSONB if HAS_JSONB else Text, nullable=True)
+    NEW_VALUES = Column(JSONB if HAS_JSONB else Text, nullable=True)

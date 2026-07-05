@@ -125,6 +125,7 @@ class AuthService:
         await self._update_redis_limit(auth.consumer_id, new_available)
         await self._publish_event(auth.auth_id, "AUTHED", None)
 
+        from common.constants import LATE_FEE_FLAT_LAK
         return AuthApprovedResponse(
             auth_id=auth.auth_id,
             status="AUTHED",
@@ -136,6 +137,8 @@ class AuthService:
             mdr_rate=mdr_rate,
             merchant_settlement_lak=merchant_settlement,
             timestamp=now,
+            total_cost_due=auth.amount_lak,
+            due_date_display=repayment_date.strftime("%d %b %Y") if repayment_date else "",
         )
 
     async def _decline(
@@ -166,6 +169,8 @@ class AuthService:
             mdr_rate=auth.mdr_rate,
             merchant_settlement_lak=auth.merchant_settlement_lak,
             timestamp=now,
+            total_cost_due=auth.approved_amount_lak or 0,
+            due_date_display=auth.repayment_date.strftime("%d %b %Y") if auth.repayment_date else "",
         )
 
     async def confirm(self, auth_id: str, db: Session) -> dict:

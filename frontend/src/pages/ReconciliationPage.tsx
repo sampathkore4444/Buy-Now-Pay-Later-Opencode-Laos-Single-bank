@@ -30,7 +30,7 @@ export default function ReconciliationPage() {
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Reconciliation</Typography>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Batch Reconciliation</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -51,7 +51,7 @@ export default function ReconciliationPage() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Daily Report</Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
@@ -61,10 +61,10 @@ export default function ReconciliationPage() {
             {report && (
               <Box>
                 <Grid container spacing={1}>
-                  <Grid size={{ xs: 6 }}><Card><CardContent><Typography variant="overline">Staged</Typography><Typography variant="h6">{report.staged_count}</Typography></CardContent></Card></Grid>
-                  <Grid size={{ xs: 6 }}><Card><CardContent><Typography variant="overline">Posted</Typography><Typography variant="h6">{report.posted_count}</Typography></CardContent></Card></Grid>
-                  <Grid size={{ xs: 6 }}><Card><CardContent><Typography variant="overline">Failed</Typography><Typography variant="h6">{report.failed_count}</Typography></CardContent></Card></Grid>
-                  <Grid size={{ xs: 6 }}><Card><CardContent><Typography variant="overline">Pending</Typography><Typography variant="h6">{report.pending_count}</Typography></CardContent></Card></Grid>
+                  <Grid xs={6}><Card><CardContent><Typography variant="overline">Staged</Typography><Typography variant="h6">{report.staged_count}</Typography></CardContent></Card></Grid>
+                  <Grid xs={6}><Card><CardContent><Typography variant="overline">Posted</Typography><Typography variant="h6">{report.posted_count}</Typography></CardContent></Card></Grid>
+                  <Grid xs={6}><Card><CardContent><Typography variant="overline">Failed</Typography><Typography variant="h6">{report.failed_count}</Typography></CardContent></Card></Grid>
+                  <Grid xs={6}><Card><CardContent><Typography variant="overline">Pending</Typography><Typography variant="h6">{report.pending_count}</Typography></CardContent></Card></Grid>
                 </Grid>
               </Box>
             )}

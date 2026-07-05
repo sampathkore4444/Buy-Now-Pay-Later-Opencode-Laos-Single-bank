@@ -50,10 +50,10 @@ export default function EodPage() {
 
       {status && (
         <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 6, sm: 3 }}><Card><CardContent><Typography variant="overline">In Progress</Typography><Typography variant="h6">{status.in_progress}</Typography></CardContent></Card></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Card><CardContent><Typography variant="overline">Pending</Typography><Typography variant="h6">{status.pending}</Typography></CardContent></Card></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Card><CardContent><Typography variant="overline">Completed</Typography><Typography variant="h6">{status.completed}</Typography></CardContent></Card></Grid>
-          <Grid size={{ xs: 6, sm: 3 }}><Card><CardContent><Typography variant="overline">Failed</Typography><Typography variant="h6">{status.failed}</Typography></CardContent></Card></Grid>
+          <Grid xs={6} sm={3}><Card><CardContent><Typography variant="overline">In Progress</Typography><Typography variant="h6">{status.in_progress}</Typography></CardContent></Card></Grid>
+          <Grid xs={6} sm={3}><Card><CardContent><Typography variant="overline">Pending</Typography><Typography variant="h6">{status.pending}</Typography></CardContent></Card></Grid>
+          <Grid xs={6} sm={3}><Card><CardContent><Typography variant="overline">Completed</Typography><Typography variant="h6">{status.completed}</Typography></CardContent></Card></Grid>
+          <Grid xs={6} sm={3}><Card><CardContent><Typography variant="overline">Failed</Typography><Typography variant="h6">{status.failed}</Typography></CardContent></Card></Grid>
         </Grid>
       )}
 

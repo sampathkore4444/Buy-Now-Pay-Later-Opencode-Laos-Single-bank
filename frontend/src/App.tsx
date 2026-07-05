@@ -15,6 +15,10 @@ import MerchantHealthPage from './pages/MerchantHealthPage';
 import ConsumersPage from './pages/ConsumersPage';
 import StagingPage from './pages/StagingPage';
 import WebhooksPage from './pages/WebhooksPage';
+import FraudRulesPage from './pages/FraudRulesPage';
+import OverdueTrackerPage from './pages/OverdueTrackerPage';
+import NotificationLogsPage from './pages/NotificationLogsPage';
+import CreditRefreshLogsPage from './pages/CreditRefreshLogsPage';
 
 const theme = createTheme({
   palette: {
@@ -46,6 +50,10 @@ function App() {
             <Route path="consumers" element={<ConsumersPage />} />
             <Route path="staging" element={<StagingPage />} />
             <Route path="webhooks" element={<WebhooksPage />} />
+            <Route path="fraud-rules" element={<FraudRulesPage />} />
+            <Route path="overdue" element={<OverdueTrackerPage />} />
+            <Route path="notifications" element={<NotificationLogsPage />} />
+            <Route path="credit-refresh" element={<CreditRefreshLogsPage />} />
           </Route>
         </Routes>
       </AuthProvider>

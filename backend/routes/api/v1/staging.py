@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from core.database import get_cbs_staging_db
@@ -29,3 +30,28 @@ def get_staging_status(
 ):
     service = StagingService()
     return service.get_status(correlation_id, cbs_db)
+
+
+class FinalizeBatchRequest(BaseModel):
+    batch_id: str = Field(..., max_length=64)
+
+
+@router.post("/batches/{batch_id}/finalize", summary="Finalize a staging batch (OPEN→READY_FOR_PICKUP)")
+def finalize_batch(
+    batch_id: str,
+    admin: dict = Depends(get_current_admin),
+    cbs_db: Session = Depends(get_cbs_staging_db),
+):
+    from cbs_staging.models import STG_TXN_CONTROL
+    service = StagingService()
+    control = cbs_db.query(STG_TXN_CONTROL).filter(STG_TXN_CONTROL.BATCH_ID == batch_id).first()
+    if not control:
+        raise HTTPException(status_code=404, detail=f"Batch {batch_id} not found")
+    service.finalize_batch(batch_id, cbs_db)
+    return {
+        "batch_id": batch_id,
+        "control_status": "READY_FOR_PICKUP",
+        "expected_record_count": control.EXPECTED_RECORD_COUNT,
+        "expected_total_amount": float(control.EXPECTED_TOTAL_AMOUNT or 0),
+        "message": "Batch finalized and ready for EOD pickup",
+    }

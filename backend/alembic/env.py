@@ -9,7 +9,10 @@ from models.merchant import Merchant, MerchantDocument, MerchantUser
 from models.consumer import Consumer, ConsumerDevice
 from models.transaction import AuthRequest, Transaction
 from models.staging import StagingHeader
-from models.settlement import Settlement, SettlementBatch, NotificationLog, FraudRule
+from models.settlement import Settlement, SettlementBatch, NotificationLog, FraudRule, CreditLimitRefreshLog
+from models.complaint import Complaint
+from models.dispute import Dispute
+from models.overdue import OverdueTracker
 
 config = context.config
 if config.config_file_name is not None:

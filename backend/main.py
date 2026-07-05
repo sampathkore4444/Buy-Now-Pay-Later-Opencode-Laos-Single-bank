@@ -22,6 +22,12 @@ from routes.api.v1 import (
     settlements_router,
     eod_router,
     reconciliation_router,
+    fees_router,
+    fraud_rules_router,
+    repayments_router,
+    credit_router,
+    notifications_router,
+    complaints_router,
 )
 from services.metrics_service import MetricsMiddleware
 from common.exceptions import (
@@ -95,6 +101,12 @@ app.include_router(disputes_router, prefix=API_V1_PREFIX)
 app.include_router(settlements_router, prefix=API_V1_PREFIX)
 app.include_router(eod_router, prefix=API_V1_PREFIX)
 app.include_router(reconciliation_router, prefix=API_V1_PREFIX)
+app.include_router(fees_router, prefix=API_V1_PREFIX)
+app.include_router(fraud_rules_router, prefix=API_V1_PREFIX)
+app.include_router(repayments_router, prefix=API_V1_PREFIX)
+app.include_router(credit_router, prefix=API_V1_PREFIX)
+app.include_router(notifications_router, prefix=API_V1_PREFIX)
+app.include_router(complaints_router, prefix=API_V1_PREFIX)
 
 
 @app.get("/health")

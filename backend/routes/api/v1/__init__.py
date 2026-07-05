@@ -10,3 +10,9 @@ from routes.api.v1.disputes import router as disputes_router
 from routes.api.v1.settlements import router as settlements_router
 from routes.api.v1.eod import router as eod_router
 from routes.api.v1.reconciliation import router as reconciliation_router
+from routes.api.v1.fees import router as fees_router
+from routes.api.v1.fraud_rules import router as fraud_rules_router
+from routes.api.v1.repayments import router as repayments_router
+from routes.api.v1.credit import router as credit_router
+from routes.api.v1.notifications import router as notifications_router
+from routes.api.v1.complaints import router as complaints_router

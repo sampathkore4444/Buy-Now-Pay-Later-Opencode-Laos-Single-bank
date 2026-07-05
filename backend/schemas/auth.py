@@ -26,6 +26,9 @@ class AuthApprovedResponse(BaseModel):
     mdr_rate: Decimal
     merchant_settlement_lak: Decimal
     timestamp: datetime
+    late_fee_disclosure: str = "Late fee of 15,000 LAK applies if not paid within 30-day period"
+    total_cost_due: Decimal = 0
+    due_date_display: str = ""
 
 
 class AuthDeclinedResponse(BaseModel):

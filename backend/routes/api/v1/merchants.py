@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 
 from core.database import get_bnpl_db
@@ -9,6 +9,7 @@ from schemas.merchant import (
 from services.merchant_service import MerchantService
 from common.utils import build_pagination_response
 from routes.dependencies import get_current_admin
+from models.merchant import MerchantDocument
 
 router = APIRouter(prefix="/merchants", tags=["Merchants"])
 
@@ -72,6 +73,49 @@ def list_merchants(
         for m in merchants
     ]
     return build_pagination_response(items, total, page, page_size)
+
+
+@router.post("/{merchant_id}/documents", summary="Upload a merchant document")
+def upload_document(
+    merchant_id: str,
+    file: UploadFile = File(...),
+    document_type: str = Query(..., max_length=32),
+    admin: dict = Depends(get_current_admin),
+    db: Session = Depends(get_bnpl_db),
+):
+    service = MerchantService()
+    merchant = service.get_by_id(merchant_id, db)
+    import uuid
+    doc_url = f"/documents/{merchant_id}/{uuid.uuid4().hex}_{file.filename}"
+    doc = MerchantDocument(
+        merchant_id=merchant_id,
+        document_type=document_type,
+        document_url=doc_url,
+        verified=False,
+    )
+    db.add(doc)
+    db.commit()
+    return {"document_id": doc.id, "document_url": doc_url, "document_type": document_type, "status": "uploaded"}
+
+
+@router.get("/{merchant_id}/documents", summary="List merchant documents")
+def list_documents(
+    merchant_id: str,
+    admin: dict = Depends(get_current_admin),
+    db: Session = Depends(get_bnpl_db),
+):
+    docs = db.query(MerchantDocument).filter(MerchantDocument.merchant_id == merchant_id).all()
+    data = []
+    for d in docs:
+        data.append({
+            "id": d.id,
+            "document_type": d.document_type,
+            "document_url": d.document_url,
+            "verified": d.verified,
+            "verified_at": d.verified_at.isoformat() if d.verified_at else None,
+            "uploaded_at": d.uploaded_at.isoformat() if d.uploaded_at else None,
+        })
+    return {"data": data}
 
 
 @router.patch("/{merchant_id}", summary="Update merchant details")

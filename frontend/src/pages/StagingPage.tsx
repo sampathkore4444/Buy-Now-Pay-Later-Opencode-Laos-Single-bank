@@ -45,7 +45,7 @@ export default function StagingPage() {
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>Staging Monitor</Typography>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Write Staging Transaction</Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -63,7 +63,7 @@ export default function StagingPage() {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Check Status</Typography>
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>

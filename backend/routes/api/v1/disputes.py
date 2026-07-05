@@ -13,7 +13,7 @@ from routes.dependencies import get_current_admin
 router = APIRouter(prefix="/disputes", tags=["Disputes"])
 
 
-@router.post("/initiate", response_model=DisputeInitiateResponse, summary="Register a dispute")
+@router.post("/initiate", response_model=DisputeInitiateResponse, status_code=201, summary="Register a dispute")
 def initiate_dispute(
     req: DisputeInitiateRequest,
     db: Session = Depends(get_bnpl_db),
@@ -32,7 +32,7 @@ def check_cooling_off(
     return service.check_cooling_off(auth_id, consumer_id, db)
 
 
-@router.post("/cooling-off/cancel", response_model=CoolingOffCancelResponse,
+@router.post("/cooling-off/cancel", response_model=CoolingOffCancelResponse, status_code=201,
              summary="Cancel transaction under cooling-off period")
 def cancel_cooling_off(
     consumer_id: str, auth_id: str,
@@ -42,7 +42,7 @@ def cancel_cooling_off(
     return service.cancel_under_cooling_off(auth_id, consumer_id, db)
 
 
-@router.post("/{dispute_id}/resolve", summary="Resolve a dispute (admin)")
+@router.post("/{dispute_id}/resolve", response_model=DisputeResponse, summary="Resolve a dispute (admin)")
 def resolve_dispute(
     dispute_id: str,
     req: DisputeResolveRequest,

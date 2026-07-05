@@ -1,11 +1,14 @@
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from datetime import datetime
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from core.database import get_bnpl_db
 from models.complaint import Complaint
-from common.utils import generate_uuid
+from schemas.common import PaginatedResponse
+from common.utils import build_pagination_response, generate_uuid
+from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/complaints", tags=["Consumer Complaints"])
@@ -23,7 +26,7 @@ class ComplaintResolveRequest(BaseModel):
     resolution: str = Field(..., max_length=2000)
 
 
-@router.post("", summary="Submit a consumer complaint")
+@router.post("", response_model=dict, status_code=201, summary="Submit a consumer complaint")
 def create_complaint(
     req: ComplaintCreateRequest,
     admin: dict = Depends(get_current_admin),
@@ -47,7 +50,7 @@ def create_complaint(
     }
 
 
-@router.get("", summary="List complaints (paginated)")
+@router.get("", response_model=PaginatedResponse, summary="List complaints (paginated)")
 def list_complaints(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -77,13 +80,10 @@ def list_complaints(
             "resolution": c.resolution,
             "created_at": c.created_at.isoformat() if c.created_at else None,
         })
-    return {
-        "data": data,
-        "pagination": {"page": page, "page_size": page_size, "total": total, "total_pages": (total + page_size - 1) // page_size},
-    }
+    return build_pagination_response(data, total, page, page_size)
 
 
-@router.post("/{complaint_id}/resolve", summary="Resolve a complaint")
+@router.post("/{complaint_id}/resolve", response_model=dict, summary="Resolve a complaint")
 def resolve_complaint(
     complaint_id: str,
     req: ComplaintResolveRequest,
@@ -92,9 +92,9 @@ def resolve_complaint(
 ):
     complaint = db.query(Complaint).filter(Complaint.complaint_id == complaint_id).first()
     if not complaint:
-        raise HTTPException(status_code=404, detail="Complaint not found")
+        raise NotFoundError("Complaint not found")
     complaint.status = "RESOLVED"
     complaint.resolution = req.resolution
-    complaint.resolved_at = __import__("datetime").datetime.utcnow()
+    complaint.resolved_at = datetime.utcnow()
     db.commit()
     return {"complaint_id": complaint_id, "status": "RESOLVED"}

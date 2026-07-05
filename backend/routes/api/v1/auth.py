@@ -38,7 +38,7 @@ async def authorize(
     return result
 
 
-@router.post("/auth/confirm", summary="Confirm an authorized transaction")
+@router.post("/auth/confirm", response_model=dict, summary="Confirm an authorized transaction")
 async def confirm_auth(
     req: AuthConfirmRequest,
     merchant: Merchant = Depends(get_api_merchant),
@@ -49,7 +49,7 @@ async def confirm_auth(
     return result
 
 
-@router.post("/auth/cancel", summary="Cancel an authorized transaction")
+@router.post("/auth/cancel", response_model=dict, summary="Cancel an authorized transaction")
 async def cancel_auth(
     req: AuthConfirmRequest,
     merchant: Merchant = Depends(get_api_merchant),
@@ -60,7 +60,7 @@ async def cancel_auth(
     return result
 
 
-@router.get("/auth/{auth_id}", summary="Get authorization status")
+@router.get("/auth/{auth_id}", response_model=dict, summary="Get authorization status")
 async def get_auth_status(
     auth_id: str,
     db: Session = Depends(get_bnpl_db),

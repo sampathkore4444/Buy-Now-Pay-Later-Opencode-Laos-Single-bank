@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -9,7 +10,7 @@ from services.reconciliation_service import ReconciliationService
 router = APIRouter(prefix="/reconciliation", tags=["Reconciliation"])
 
 
-@router.post("/batch", summary="Reconcile a staging batch")
+@router.post("/batch", response_model=ReconcileBatchResponse, summary="Reconcile a staging batch")
 def reconcile_batch(
     req: ReconcileBatchRequest,
     admin: dict = Depends(get_current_admin),
@@ -20,13 +21,12 @@ def reconcile_batch(
     return ReconcileBatchResponse(**result)
 
 
-@router.get("/daily-report", summary="Generate daily reconciliation report")
+@router.get("/daily-report", response_model=DailyReconcileReportResponse, summary="Generate daily reconciliation report")
 def daily_report(
     report_date: str | None = None,
     admin: dict = Depends(get_current_admin),
     cbs_db: Session = Depends(get_cbs_staging_db),
 ):
-    from datetime import date
     srv = ReconciliationService()
     result = srv.generate_daily_report(report_date or str(date.today()), cbs_db)
     return DailyReconcileReportResponse(**result)

@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from core.database import get_bnpl_db
 from models.settlement import FraudRule
+from schemas.common import PaginatedResponse
+from common.utils import build_pagination_response
+from common.exceptions import ConflictError, NotFoundError
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/fraud-rules", tags=["Fraud Rules"])
@@ -27,12 +30,16 @@ class FraudRuleUpdate(BaseModel):
     enabled: bool | None = None
 
 
-@router.get("", summary="List all fraud rules")
+@router.get("", response_model=PaginatedResponse, summary="List all fraud rules")
 def list_rules(
     admin: dict = Depends(get_current_admin),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_bnpl_db),
 ):
-    rules = db.query(FraudRule).order_by(FraudRule.rule_name).all()
+    query = db.query(FraudRule).order_by(FraudRule.rule_name)
+    total = query.count()
+    rules = query.offset((page - 1) * page_size).limit(page_size).all()
     data = []
     for r in rules:
         data.append({
@@ -45,10 +52,10 @@ def list_rules(
             "enabled": r.enabled,
             "created_at": r.created_at.isoformat() if r.created_at else None,
         })
-    return {"data": data, "total": len(data)}
+    return build_pagination_response(data, total, page, page_size)
 
 
-@router.post("", summary="Create a fraud rule")
+@router.post("", response_model=dict, status_code=201, summary="Create a fraud rule")
 def create_rule(
     req: FraudRuleCreate,
     admin: dict = Depends(get_current_admin),
@@ -56,7 +63,7 @@ def create_rule(
 ):
     existing = db.query(FraudRule).filter(FraudRule.rule_name == req.rule_name).first()
     if existing:
-        raise HTTPException(status_code=409, detail=f"Rule '{req.rule_name}' already exists")
+        raise ConflictError(f"Rule '{req.rule_name}' already exists")
     rule = FraudRule(
         rule_name=req.rule_name,
         rule_type=req.rule_type,
@@ -71,7 +78,7 @@ def create_rule(
     return {"id": rule.id, "rule_name": rule.rule_name, "status": "created"}
 
 
-@router.put("/{rule_id}", summary="Update a fraud rule")
+@router.put("/{rule_id}", response_model=dict, summary="Update a fraud rule")
 def update_rule(
     rule_id: int,
     req: FraudRuleUpdate,
@@ -80,7 +87,7 @@ def update_rule(
 ):
     rule = db.query(FraudRule).filter(FraudRule.id == rule_id).first()
     if not rule:
-        raise HTTPException(status_code=404, detail="Rule not found")
+        raise NotFoundError("Rule not found")
     updates = req.model_dump(exclude_none=True)
     for field, value in updates.items():
         setattr(rule, field, value)
@@ -88,7 +95,7 @@ def update_rule(
     return {"id": rule.id, "rule_name": rule.rule_name, "status": "updated"}
 
 
-@router.delete("/{rule_id}", summary="Delete a fraud rule")
+@router.delete("/{rule_id}", status_code=204, summary="Delete a fraud rule")
 def delete_rule(
     rule_id: int,
     admin: dict = Depends(get_current_admin),
@@ -96,7 +103,6 @@ def delete_rule(
 ):
     rule = db.query(FraudRule).filter(FraudRule.id == rule_id).first()
     if not rule:
-        raise HTTPException(status_code=404, detail="Rule not found")
+        raise NotFoundError("Rule not found")
     db.delete(rule)
     db.commit()
-    return {"status": "deleted"}

@@ -4,13 +4,15 @@ from sqlalchemy.orm import Session
 
 from core.database import get_bnpl_db, get_cbs_staging_db
 from models.overdue import OverdueTracker
+from schemas.common import PaginatedResponse
+from common.utils import build_pagination_response
 from services.fee_service import FeeService
 from routes.dependencies import get_current_admin
 
 router = APIRouter(prefix="/fees", tags=["Fees & Overdue"])
 
 
-@router.get("/overdue", summary="List overdue trackers (paginated)")
+@router.get("/overdue", response_model=PaginatedResponse, summary="List overdue trackers (paginated)")
 def list_overdue(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -38,13 +40,10 @@ def list_overdue(
             "last_fee_assessment": t.last_fee_assessment.isoformat() if t.last_fee_assessment else None,
             "last_interest_assessment": t.last_interest_assessment.isoformat() if t.last_interest_assessment else None,
         })
-    return {
-        "data": data,
-        "pagination": {"page": page, "page_size": page_size, "total": total, "total_pages": (total + page_size - 1) // page_size},
-    }
+    return build_pagination_response(data, total, page, page_size)
 
 
-@router.get("/overdue/{consumer_id}", summary="Get consumer overdue details")
+@router.get("/overdue/{consumer_id}", response_model=dict, summary="Get consumer overdue details")
 def get_consumer_overdue(
     consumer_id: str,
     admin: dict = Depends(get_current_admin),
@@ -58,7 +57,7 @@ def get_consumer_overdue(
     return result
 
 
-@router.post("/assess-late-fees", summary="Trigger late fee assessment batch")
+@router.post("/assess-late-fees", response_model=dict, summary="Trigger late fee assessment batch")
 def assess_late_fees(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -70,7 +69,7 @@ def assess_late_fees(
     return {"status": "COMPLETED", **result}
 
 
-@router.post("/assess-interest", summary="Trigger interest assessment batch")
+@router.post("/assess-interest", response_model=dict, summary="Trigger interest assessment batch")
 def assess_interest(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),

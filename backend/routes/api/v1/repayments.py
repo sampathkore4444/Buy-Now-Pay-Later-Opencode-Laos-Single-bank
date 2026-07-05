@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db, get_cbs_staging_db
 from services.auto_debit_service import AutoDebitService
 from services.fee_service import FeeService
+from services.staging_service import StagingService
 from models.consumer import Consumer
 from models.transaction import Transaction
 from common.enums import TxnType, TxnCategory
@@ -22,7 +23,7 @@ class ManualRepaymentRequest(BaseModel):
     amount_lak: Decimal = Field(..., gt=0)
 
 
-@router.post("/trigger-auto-debit", summary="Trigger auto-debit repayment batch")
+@router.post("/trigger-auto-debit", response_model=dict, summary="Trigger auto-debit repayment batch")
 def trigger_auto_debit(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -34,7 +35,7 @@ def trigger_auto_debit(
     return {"status": "COMPLETED", **result}
 
 
-@router.post("/manual", summary="Record a manual consumer repayment")
+@router.post("/manual", response_model=dict, status_code=201, summary="Record a manual consumer repayment")
 def manual_repayment(
     req: ManualRepaymentRequest,
     admin: dict = Depends(get_current_admin),
@@ -63,7 +64,6 @@ def manual_repayment(
     )
     bnpl_db.add(txn)
 
-    from services.staging_service import StagingService
     staging_service = StagingService()
     staging_req = {
         "batch_id": datetime.utcnow().strftime("BNPL_%Y%m%d_%H"),

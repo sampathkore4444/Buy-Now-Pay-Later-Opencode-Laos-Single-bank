@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from core.database import get_cbs_staging_db
 from cbs_staging.models import STG_TXN_CONTROL
 from schemas.eod import EODBatchStatusResponse, EODRunResponse, EODListResponse
+from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 from tasks.eod_batch import EODBatchProcessor
 
 router = APIRouter(prefix="/eod", tags=["EOD Batch"])
 
 
-@router.get("/batches", summary="List EOD batch runs")
+@router.get("/batches", response_model=EODListResponse, summary="List EOD batch runs")
 def list_eod_batches(
     page: int = 1,
     page_size: int = 20,
@@ -41,7 +42,7 @@ def list_eod_batches(
     )
 
 
-@router.get("/batches/{batch_id}", summary="Get EOD batch details")
+@router.get("/batches/{batch_id}", response_model=EODBatchStatusResponse, summary="Get EOD batch details")
 def get_eod_batch(
     batch_id: str,
     admin: dict = Depends(get_current_admin),
@@ -49,7 +50,7 @@ def get_eod_batch(
 ):
     b = cbs_db.query(STG_TXN_CONTROL).filter(STG_TXN_CONTROL.BATCH_ID == batch_id).first()
     if not b:
-        raise HTTPException(status_code=404, detail="Batch not found")
+        raise NotFoundError("Batch not found")
     return EODBatchStatusResponse(
         batch_id=b.BATCH_ID,
         control_status=b.CONTROL_STATUS,
@@ -64,7 +65,7 @@ def get_eod_batch(
     )
 
 
-@router.post("/run", summary="Trigger EOD batch processing")
+@router.post("/run", response_model=dict, summary="Trigger EOD batch processing")
 def trigger_eod(
     background_tasks: BackgroundTasks,
     admin: dict = Depends(get_current_admin),
@@ -74,7 +75,7 @@ def trigger_eod(
     return {"message": "EOD batch processing triggered", "status": "PENDING"}
 
 
-@router.get("/status", summary="Get EOD system status")
+@router.get("/status", response_model=dict, summary="Get EOD system status")
 def eod_system_status(
     admin: dict = Depends(get_current_admin),
     cbs_db: Session = Depends(get_cbs_staging_db),

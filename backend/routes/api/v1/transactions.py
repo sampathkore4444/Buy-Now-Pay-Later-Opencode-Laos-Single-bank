@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from core.database import get_bnpl_db
 from services.transaction_service import TransactionService
 from schemas.transaction import TransactionResponse
+from schemas.common import PaginatedResponse
 from common.utils import build_pagination_response
 from routes.dependencies import get_current_admin
 
@@ -41,7 +42,7 @@ def get_transaction(
     return _to_response(txn)
 
 
-@router.get("", summary="List transactions")
+@router.get("", response_model=PaginatedResponse, summary="List transactions")
 def list_transactions(
     admin: dict = Depends(get_current_admin),
     merchant_id: str | None = Query(None),
@@ -57,5 +58,5 @@ def list_transactions(
         txns, total = service.list_by_consumer(consumer_id, db, page, page_size)
     else:
         return {"data": [], "pagination": {"page": page, "page_size": page_size, "total": 0, "total_pages": 0}}
-    items = [_to_response(t) for t in txns]
+    items = [_to_response(t).model_dump() for t in txns]
     return build_pagination_response(items, total, page, page_size)

@@ -43,12 +43,14 @@ def build_pagination_response(
     page: int,
     page_size: int,
 ) -> dict[str, Any]:
+    from schemas.common import PaginationInfo
+    pagination = PaginationInfo(
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=(total + page_size - 1) // page_size,
+    )
     return {
         "data": items,
-        "pagination": {
-            "page": page,
-            "page_size": page_size,
-            "total": total,
-            "total_pages": (total + page_size - 1) // page_size,
-        },
+        "pagination": pagination.model_dump(),
     }

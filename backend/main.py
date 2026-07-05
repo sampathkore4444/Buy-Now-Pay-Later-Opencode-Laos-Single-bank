@@ -37,6 +37,7 @@ from common.exceptions import (
     BadRequestError,
     UnauthorizedError,
     ForbiddenError,
+    ServiceUnavailableError,
     InsufficientLimitError,
 )
 
@@ -88,6 +89,28 @@ async def bad_request_handler(request: Request, exc: BadRequestError):
 @app.exception_handler(InsufficientLimitError)
 async def insufficient_limit_handler(request: Request, exc: InsufficientLimitError):
     return JSONResponse(status_code=exc.status_code, content=exc.detail)
+
+
+@app.exception_handler(UnauthorizedError)
+async def unauthorized_handler(request: Request, exc: UnauthorizedError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(ForbiddenError)
+async def forbidden_handler(request: Request, exc: ForbiddenError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(ServiceUnavailableError)
+async def service_unavailable_handler(request: Request, exc: ServiceUnavailableError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import logging
+    logging.getLogger(__name__).exception("Unhandled exception")
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
 API_V1_PREFIX = "/api/v1"

@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, Query, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, Query, UploadFile, File
 from sqlalchemy.orm import Session
+import uuid
 
 from core.database import get_bnpl_db
 from schemas.merchant import (
     MerchantOnboardRequest, MerchantOnboardResponse,
     MerchantDetailResponse, MerchantUpdateRequest,
 )
+from schemas.common import PaginatedResponse
 from services.merchant_service import MerchantService
 from common.utils import build_pagination_response
 from routes.dependencies import get_current_admin
@@ -25,7 +27,7 @@ def onboard_merchant(
     return service.onboard(req, db)
 
 
-@router.get("/{merchant_id}", summary="Get merchant details")
+@router.get("/{merchant_id}", response_model=MerchantDetailResponse, summary="Get merchant details")
 def get_merchant(
     merchant_id: str,
     admin: dict = Depends(get_current_admin),
@@ -47,7 +49,7 @@ def get_merchant(
     )
 
 
-@router.get("", summary="List merchants")
+@router.get("", response_model=PaginatedResponse, summary="List merchants")
 def list_merchants(
     admin: dict = Depends(get_current_admin),
     page: int = Query(1, ge=1),
@@ -69,13 +71,13 @@ def list_merchants(
             monthly_limit_lak=m.monthly_limit_lak,
             channels=m.channels.split(",") if m.channels else [],
             created_at=m.created_at,
-        )
+        ).model_dump()
         for m in merchants
     ]
     return build_pagination_response(items, total, page, page_size)
 
 
-@router.post("/{merchant_id}/documents", summary="Upload a merchant document")
+@router.post("/{merchant_id}/documents", response_model=dict, status_code=201, summary="Upload a merchant document")
 def upload_document(
     merchant_id: str,
     file: UploadFile = File(...),
@@ -85,7 +87,6 @@ def upload_document(
 ):
     service = MerchantService()
     merchant = service.get_by_id(merchant_id, db)
-    import uuid
     doc_url = f"/documents/{merchant_id}/{uuid.uuid4().hex}_{file.filename}"
     doc = MerchantDocument(
         merchant_id=merchant_id,
@@ -98,7 +99,7 @@ def upload_document(
     return {"document_id": doc.id, "document_url": doc_url, "document_type": document_type, "status": "uploaded"}
 
 
-@router.get("/{merchant_id}/documents", summary="List merchant documents")
+@router.get("/{merchant_id}/documents", response_model=dict, summary="List merchant documents")
 def list_documents(
     merchant_id: str,
     admin: dict = Depends(get_current_admin),
@@ -118,7 +119,7 @@ def list_documents(
     return {"data": data}
 
 
-@router.patch("/{merchant_id}", summary="Update merchant details")
+@router.patch("/{merchant_id}", response_model=MerchantDetailResponse, summary="Update merchant details")
 def update_merchant(
     merchant_id: str,
     req: MerchantUpdateRequest,

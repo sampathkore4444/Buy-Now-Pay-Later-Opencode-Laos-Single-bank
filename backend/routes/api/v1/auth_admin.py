@@ -29,7 +29,7 @@ class ConsumerLoginRequest(BaseModel):
     phone: str = Field(..., max_length=20)
 
 
-@router.post("/consumer-login", summary="Consumer-facing login for limit self-service")
+@router.post("/consumer-login", response_model=dict, summary="Consumer-facing login for limit self-service")
 def consumer_login(
     req: ConsumerLoginRequest,
     db: Session = Depends(get_bnpl_db),
@@ -56,9 +56,11 @@ def login(
 ):
     user = db.query(MerchantUser).filter(MerchantUser.email == req.email).first()
     if not user or not verify_password(req.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        from common.exceptions import UnauthorizedError as AuthError
+        raise AuthError("Invalid email or password")
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="Account is disabled")
+        from common.exceptions import ForbiddenError
+        raise ForbiddenError("Account is disabled")
 
     token_data = {
         "sub": user.email,

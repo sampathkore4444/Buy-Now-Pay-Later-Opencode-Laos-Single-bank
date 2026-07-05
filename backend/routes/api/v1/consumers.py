@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from core.database import get_bnpl_db, get_cbs_staging_db
+from core.database import get_bnpl_db
 from services.consumer_service import ConsumerService
 from schemas.consumer import ConsumerLimitResponse
+from schemas.common import PaginatedResponse
+from common.utils import build_pagination_response
 from routes.dependencies import get_current_admin, get_current_consumer
 from models.consumer import Consumer
 
@@ -46,7 +48,7 @@ def enroll_consumer(
     )
 
 
-@router.get("", summary="List consumers (paginated)")
+@router.get("", response_model=PaginatedResponse, summary="List consumers (paginated)")
 def list_consumers(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -75,13 +77,10 @@ def list_consumers(
             "is_active": c.is_active,
             "created_at": c.created_at.isoformat() if c.created_at else None,
         })
-    return {
-        "data": data,
-        "pagination": {"page": page, "page_size": page_size, "total": total, "total_pages": (total + page_size - 1) // page_size},
-    }
+    return build_pagination_response(data, total, page, page_size)
 
 
-@router.get("/me", summary="Get current consumer profile (consumer-facing)")
+@router.get("/me", response_model=dict, summary="Get current consumer profile (consumer-facing)")
 def get_my_profile(
     consumer: Consumer = Depends(get_current_consumer),
 ):
@@ -111,7 +110,7 @@ def get_my_limit(
     )
 
 
-@router.get("/{consumer_id}/limit", summary="Get consumer BNPL limit")
+@router.get("/{consumer_id}/limit", response_model=ConsumerLimitResponse, summary="Get consumer BNPL limit")
 def get_consumer_limit(
     consumer_id: str,
     admin: dict = Depends(get_current_admin),

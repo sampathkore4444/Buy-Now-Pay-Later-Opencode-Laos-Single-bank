@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from datetime import date
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from core.database import get_bnpl_db
 from models.settlement import Settlement
 from schemas.settlement import SettlementResponse, SettlementListResponse
+from common.exceptions import NotFoundError
 from routes.dependencies import get_current_admin
 from services.settlement_service import SettlementService
 
 router = APIRouter(prefix="/settlements", tags=["Settlements"])
 
 
-@router.get("", summary="List settlements (paginated)")
+@router.get("", response_model=SettlementListResponse, summary="List settlements (paginated)")
 def list_settlements(
     merchant_id: str | None = None,
     page: int = 1,
@@ -30,7 +32,7 @@ def list_settlements(
     )
 
 
-@router.get("/{settlement_id}", summary="Get settlement details")
+@router.get("/{settlement_id}", response_model=SettlementResponse, summary="Get settlement details")
 def get_settlement(
     settlement_id: str,
     admin: dict = Depends(get_current_admin),
@@ -38,18 +40,18 @@ def get_settlement(
 ):
     settlement = db.query(Settlement).filter(Settlement.settlement_id == settlement_id).first()
     if not settlement:
-        raise HTTPException(status_code=404, detail="Settlement not found")
+        raise NotFoundError("Settlement not found")
     return SettlementResponse.model_validate(settlement)
 
 
-@router.post("/{merchant_id}/create-daily", summary="Create daily settlement for a merchant")
+@router.post("/{merchant_id}/create-daily", response_model=SettlementResponse, status_code=201,
+             summary="Create daily settlement for a merchant")
 def create_daily_settlement(
     merchant_id: str,
     settlement_date: str | None = None,
     admin: dict = Depends(get_current_admin),
     db: Session = Depends(get_bnpl_db),
 ):
-    from datetime import date
     srv = SettlementService()
     s = srv.create_daily_settlement(
         merchant_id=merchant_id,
